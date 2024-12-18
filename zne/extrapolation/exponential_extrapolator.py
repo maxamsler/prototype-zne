@@ -135,13 +135,17 @@ class MultiExponentialExtrapolator(OLSExtrapolator):
         sigma_x: tuple[float, ...],  # pylint: disable=unused-argument
         sigma_y: tuple[float, ...],
     ) -> ReckoningResult:
+        if self.num_terms == 1:
+            p0 = [2 ** (-i) for i in range(self.num_terms * 2 + 1)]
+        else:
+            p0 = [2 for i in range(self.num_terms * 2 + 1)]
         coefficients, covariance_matrix = curve_fit(
             self._model,
             x_data,
             y_data,
             sigma=self._compute_sigma(y_data, sigma_y),
             absolute_sigma=True,
-            p0=[2 ** (-i) for i in range(self.num_terms * 2 + 1)],
+            p0=p0,
             bounds=([-inf] + [-inf, 0] * self.num_terms, inf),  # Note: only decay considered
             max_nfev=None,
         )

@@ -137,8 +137,10 @@ class MultiExponentialExtrapolator(OLSExtrapolator):
     ) -> ReckoningResult:
         if self.num_terms == 1:
             p0 = [2 ** (-i) for i in range(self.num_terms * 2 + 1)]
+            max_nfev = None
         else:
             p0 = [2 for i in range(self.num_terms * 2 + 1)]
+            max_nfev = 10000
         coefficients, covariance_matrix = curve_fit(
             self._model,
             x_data,
@@ -147,7 +149,7 @@ class MultiExponentialExtrapolator(OLSExtrapolator):
             absolute_sigma=True,
             p0=p0,
             bounds=([-inf] + [-inf, 0] * self.num_terms, inf),  # Note: only decay considered
-            max_nfev=None,
+            max_nfev=max_nfev,
         )
         value = self._model(0, *coefficients)
         entries = ones(self.num_terms * 2 + 1)
